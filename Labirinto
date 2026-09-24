@@ -1,0 +1,238 @@
+// ============================================================
+// JOGO DO LABIRINTO
+// Trabalho N1 - Algoritmos II
+//
+// Aluna: Gabrielly de Oliveira
+// Aluna: Rayssa Carasilo
+// Professor: Alessandro João Brassanini
+// ============================================================
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <windows.h>
+
+#define N 10
+
+
+// ============================================================
+// FUNÇÃO PARA MUDAR A COR
+// ============================================================
+
+void mudarCor(int cor)
+{
+    SetConsoleTextAttribute(
+        GetStdHandle(STD_OUTPUT_HANDLE), cor);
+}
+
+
+// ============================================================
+// FUNÇÃO PARA MOSTRAR O LABIRINTO
+// ============================================================
+
+void mostrarLabirinto(int labirinto[N][N], int x, int y)
+{
+    int i, j;
+
+    printf("=====================================\n");
+    printf("          JOGO DO LABIRINTO\n");
+    printf("=====================================\n\n");
+
+    for (i = 0; i < N; i++)
+    {
+        for (j = 0; j < N; j++)
+        {
+            // Jogador
+            if (i == x && j == y)
+            {
+                mudarCor(10);
+                printf("@ ");
+            }
+
+            // Parede
+            else if (labirinto[i][j] == 1)
+            {
+                mudarCor(8);
+                printf("X ");
+            }
+
+            // Saida
+            else if (labirinto[i][j] == -1)
+            {
+                mudarCor(14);
+                printf("O ");
+            }
+
+            // Caminho
+            else
+            {
+                mudarCor(7);
+                printf(". ");
+            }
+        }
+
+        printf("\n");
+    }
+
+    // Volta para a cor normal
+    mudarCor(7);
+
+    // Mostra a coordenada atual
+    printf("\nLinha: %d", x + 1);
+    printf(" | Coluna: %d\n", y + 1);
+
+    printf("\nW = Cima");
+    printf(" | S = Baixo");
+    printf(" | A = Esquerda");
+    printf(" | D = Direita\n");
+}
+
+
+// ============================================================
+// PROGRAMA PRINCIPAL
+// ============================================================
+
+int main()
+{
+    // --------------------------------------------------------
+    // MATRIZ DO LABIRINTO
+    //
+    // 0  = caminho
+    // 1  = parede
+    // -1 = saida
+    // --------------------------------------------------------
+
+    int labirinto[N][N] =
+    {
+        {0, 1, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 1, 1, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 1, 0},
+        {1, 1, 0, 1, 1, 1, 1, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 1, 1, 1, 1, 1, 1, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+        {1, 1, 1, 1, 1, 0, 1, 0, 1, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+        {1, 1, 1, 0, 0, 0, 1, 0, 0, -1}
+    };
+
+
+    // Posição inicial do jogador
+    int x = 0;
+    int y = 0;
+
+    // Comando digitado pelo jogador
+    char comando;
+
+    // Controle do jogo
+    int jogando = 1;
+
+
+    // --------------------------------------------------------
+    // LOOP PRINCIPAL
+    // --------------------------------------------------------
+
+    while (jogando)
+    {
+        // Limpa a tela
+        system("cls");
+
+        // Mostra o labirinto
+        mostrarLabirinto(labirinto, x, y);
+
+
+        // ----------------------------------------------------
+        // VERIFICA SE CHEGOU NA SAIDA
+        // ----------------------------------------------------
+
+        if (labirinto[x][y] == -1)
+        {
+            mudarCor(10);
+
+            printf("\nParabens! Voce encontrou a saida!\n");
+
+            mudarCor(7);
+
+            break;
+        }
+
+
+        // ----------------------------------------------------
+        // PEDE O MOVIMENTO
+        // ----------------------------------------------------
+
+        printf("\nDigite seu movimento: ");
+        scanf(" %c", &comando);
+
+        comando = toupper(comando);
+
+
+        // ----------------------------------------------------
+        // NOVA POSICAO
+        // ----------------------------------------------------
+
+        int novoX = x;
+        int novoY = y;
+
+
+        // Cima
+        if (comando == 'W')
+        {
+            novoX--;
+        }
+
+        // Baixo
+        else if (comando == 'S')
+        {
+            novoX++;
+        }
+
+        // Esquerda
+        else if (comando == 'A')
+        {
+            novoY--;
+        }
+
+        // Direita
+        else if (comando == 'D')
+        {
+            novoY++;
+        }
+
+        // Comando inválido
+        else
+        {
+            printf("\nComando invalido!\n");
+        }
+
+
+        // ----------------------------------------------------
+        // VERIFICA SE O MOVIMENTO PODE SER REALIZADO
+        // ----------------------------------------------------
+
+        if (comando == 'W' ||
+            comando == 'S' ||
+            comando == 'A' ||
+            comando == 'D')
+        {
+            if (novoX >= 0 &&
+                novoX < N &&
+                novoY >= 0 &&
+                novoY < N &&
+                labirinto[novoX][novoY] != 1)
+            {
+                // Atualiza a posição
+                x = novoX;
+                y = novoY;
+            }
+            else
+            {
+                printf("\nMovimento invalido!");
+                printf(" Parede ou fora do labirinto!\n");
+            }
+        }
+    }
+
+
+    return 0;
+}
