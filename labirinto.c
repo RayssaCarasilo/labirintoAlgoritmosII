@@ -1,130 +1,243 @@
-// Desenvolvido por Alessandro Jo�o Brassanini
-// Data: 19 de Abril de 2022
+// ============================================================
+// JOGO DO LABIRINTO
+// Trabalho N1 - Algoritmos II
+//
+// Aluna: Gabrielly de Oliveira
+// Aluna: Rayssa Carasilo
+// Professor: Alessandro João Brassanini
+// ============================================================
 
-/*
-Uso de matriz bidimensional (5x5) para armazenar o cen�rio.
-La�os de repeti��o para imprimir o labirinto a cada rodada.
-Condicionais para validar os movimentos e impedir atravessar paredes.
-Leitura de teclado com scanf para capturar as dire��es.
-Verifica��o de vit�ria quando o jogador chega na sa�da.
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <windows.h>
 
-Regras:
-P - posi��o atual do jogador.
-0 - caminho livre.
-1 - parede (n�o pode atravessar).
-S - sa�da (objetivo do jogo).
-
-*/
+#define N 10
 
 
-#include <stdio.h>   // Necess�rio para printf e scanf
-#include <stdlib.h>  // Necess�rio para system (limpar tela em alguns sistemas)
-#include <ctype.h>   // Necess�rio para toupper (converter tecla para mai�scula)
+// ============================================================
+// FUNÇÃO PARA MUDAR A COR
+// ============================================================
 
-#define N 5 // Tamanho da matriz do labirinto
+void mudarCor(int cor)
+{
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), cor);
+}
+
+
+// ============================================================
+// FUNÇÃO PARA MOSTRAR O LABIRINTO
+// ============================================================
+
+void mostrarLabirinto(int labirinto[N][N], int x, int y)
+{
+    int i, j;
+
+    printf("=====================================\n");
+    printf("          JOGO DO LABIRINTO\n");
+    printf("=====================================\n\n");
+
+    for (i = 0; i < N; i++)
+    {
+        for (j = 0; j < N; j++)
+        {
+            // Jogador
+            if (i == x && j == y)
+            {
+                mudarCor(10);
+                printf("@ ");
+            }
+
+            // Parede
+            else if (labirinto[i][j] == 1)
+            {
+                mudarCor(8);
+                printf("X ");
+            }
+
+            // Saida
+            else if (labirinto[i][j] == -1)
+            {
+                mudarCor(14);
+                printf("O ");
+            }
+
+            // Caminho
+            else
+            {
+                mudarCor(7);
+                printf(". ");
+            }
+        }
+
+        printf("\n");
+    }
+
+    // Volta para a cor normal
+    mudarCor(7);
+
+    // Mostra a coordenada atual
+    printf("\nLinha: %d", x + 1);
+    printf(" | Coluna: %d\n", y + 1);
+
+    printf("\nW = Cima");
+    printf(" | S = Baixo");
+    printf(" | A = Esquerda");
+    printf(" | D = Direita\n");
+}
+
+void beepComDuracao(int duracao)
+{
+    Beep(750, duracao);
+}
+
+
+// ============================================================
+// PROGRAMA PRINCIPAL
+// ============================================================
 
 int main()
 {
-    // Matriz que representa o labirinto
-    // 0 = caminho, 1 = parede, S = sa�da (marcada por -1 aqui)
+    // --------------------------------------------------------
+    // MATRIZ DO LABIRINTO
+    //
+    // 0  = caminho
+    // 1  = parede
+    // -1 = saida
+    // --------------------------------------------------------
+
     int labirinto[N][N] =
     {
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {1, 1, 0, 1, 0},
-        {0, 0, 0, 0, -1} // -1 indica sa�da (ser� exibida como 'S')
+        {0, 1, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 1, 1, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 1, 0},
+        {1, 1, 0, 1, 1, 1, 1, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 1, 1, 1, 1, 1, 1, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+        {1, 1, 1, 1, 1, 0, 1, 0, 1, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+        {1, 1, 1, 0, 0, 0, 1, 0, 0, -1}
     };
 
-    int x = 0, y = 0; // Posi��o inicial do jogador (linha, coluna)
-    char comando;     // Vari�vel para armazenar o comando do jogador
-    int jogando = 1;  // Controle do loop principal do jogo
 
-    // Loop principal do jogo
+    // Posição inicial do jogador
+    int x = 0;
+    int y = 0;
+
+    // Comando digitado pelo jogador
+    char comando;
+
+    // Controle do jogo
+    int jogando = 1;
+
+
+    // --------------------------------------------------------
+    // LOOP PRINCIPAL
+    // --------------------------------------------------------
+
     while (jogando)
     {
-        // Limpa a tela (funciona no Windows com "cls", em Linux/Mac com "clear")
-        // Se estiver testando no Code::Blocks ou terminal, pode comentar a linha abaixo
-        system("clear || cls");
+        // Limpa a tela
+        system("cls");
 
-        // Exibe o labirinto
-        printf("Jogo do Labirinto 5x5\n");
-        printf("Use W (cima), S (baixo), A (esquerda), D (direita)\n");
-        printf("Objetivo: chegar na saida (S)\n\n");
+        // Mostra o labirinto
+        mostrarLabirinto(labirinto, x, y);
 
-        int i, j;
-        for (i = 0; i < N; i++)
-        {
-            for (j = 0; j < N; j++)
-            {
-                if (i == x && j == y)
-                {
-                    printf("P "); // Mostra jogador
-                }
-                else if (labirinto[i][j] == 1)
-                {
-                    printf("# "); // Mostra parede
-                }
-                else if (labirinto[i][j] == -1)
-                {
-                    printf("S "); // Mostra sa�da
-                }
-                else
-                {
-                    printf(". "); // Mostra caminho livre
-                }
-            }
-            printf("\n");
-        }
 
-        // Verifica se chegou � sa�da
+        // ----------------------------------------------------
+        // VERIFICA SE CHEGOU NA SAIDA
+        // ----------------------------------------------------
+
         if (labirinto[x][y] == -1)
         {
+            mudarCor(10);
+
             printf("\nParabens! Voce encontrou a saida!\n");
-            break; // Sai do jogo
+
+            mudarCor(7);
+
+            break;
         }
 
-        // Solicita movimento do jogador
-        printf("\nDigite seu movimento (W/A/S/D): ");
-        scanf(" %c", &comando);
-        comando = toupper(comando); // Converte para mai�scula para facilitar
 
-        // Calcula nova posi��o do jogador
+        // ----------------------------------------------------
+        // PEDE O MOVIMENTO
+        // ----------------------------------------------------
+
+        printf("\nDigite seu movimento: ");
+        scanf(" %c", &comando);
+
+        comando = toupper(comando);
+
+
+        // ----------------------------------------------------
+        // NOVA POSICAO
+        // ----------------------------------------------------
+
         int novoX = x;
         int novoY = y;
 
+
+        // Cima
         if (comando == 'W')
         {
-            novoX--; // Move para cima
-        }
-        else if (comando == 'S')
-        {
-            novoX++; // Move para baixo
-        }
-        else if (comando == 'A')
-        {
-            novoY--; // Move para esquerda
-        }
-        else if (comando == 'D')
-        {
-            novoY++; // Move para direita
-        }
-        else
-        {
-            printf("Comando invalido!\n");
+            novoX--;
         }
 
-        // Verifica se nova posi��o � v�lida (dentro da matriz e n�o � parede)
-        if (novoX >= 0 && novoX < N && novoY >= 0 && novoY < N && labirinto[novoX][novoY] != 1)
+        // Baixo
+        else if (comando == 'S')
         {
-            x = novoX;
-            y = novoY; // Atualiza posi��o do jogador
+            novoX++;
         }
+
+        // Esquerda
+        else if (comando == 'A')
+        {
+            novoY--;
+        }
+
+        // Direita
+        else if (comando == 'D')
+        {
+            novoY++;
+        }
+
+        // Comando inválido
         else
         {
-            printf("Movimento invalido! Parede ou fora dos limites!\n");
+            printf("\nComando invalido!\n");
+        }
+
+
+        // ----------------------------------------------------
+        // VERIFICA SE O MOVIMENTO PODE SER REALIZADO
+        // ----------------------------------------------------
+
+        if (comando == 'W' ||
+            comando == 'S' ||
+            comando == 'A' ||
+            comando == 'D')
+        {
+            if (novoX >= 0 &&
+                novoX < N &&
+                novoY >= 0 &&
+                novoY < N &&
+                labirinto[novoX][novoY] != 1)
+            {
+                // Atualiza a posição
+                x = novoX;
+                y = novoY;
+            }
+            else
+            {
+                beepComDuracao(500);
+                printf("\nMovimento invalido!");
+                printf(" Parede ou fora do labirinto!\n");
+            }
         }
     }
 
-    return 0; // Fim do jogo
+
+    return 0;
 }
